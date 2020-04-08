@@ -28,7 +28,7 @@ ext {
   }
   fullVersion = baseVersion + ((!snapshotVersion && releaseCandidate) ? "-rc-$releaseCandidate" : "") + "-groovy-$variant" + (snapshotVersion ? "-SNAPSHOT" : '')
     variantLessVersion = baseVersion + (snapshotVersion ? "-SNAPSHOT" : (releaseCandidate ? "-rc-$releaseCandidate" : ""))
-  javaVersions = [1.7, 1.8]
+  javaVersions = [1.8]
   javaVersion = System.getProperty("java.specification.version") as BigDecimal
   libs = [
     jetbrainsAnnotations: "org.jetbrains:annotations:13.0",
@@ -40,7 +40,8 @@ ext {
     h2database: "com.h2database:h2:1.3.176",
     junit: "junit:junit:4.12",
     log4j: "log4j:log4j:1.2.17",
-    objenesis: "org.objenesis:objenesis:2.5.1"
+    objenesis: "org.objenesis:objenesis:2.5.1",
+    javaxannotationapi: "javax.annotation:javax.annotation-api:1.2"
   ]
   Date buildTimeAndDate = new Date()
   buildDate = new SimpleDateFormat('yyyy-MM-dd').format(buildTimeAndDate)

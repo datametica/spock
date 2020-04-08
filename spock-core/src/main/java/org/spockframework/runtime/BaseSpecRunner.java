@@ -16,6 +16,7 @@
 
 package org.spockframework.runtime;
 
+import org.spockframework.runtime.annotations.Parallel;
 import org.spockframework.runtime.extension.*;
 import org.spockframework.runtime.model.*;
 import org.spockframework.util.*;
@@ -177,7 +178,15 @@ public class BaseSpecRunner {
 
   private void runFeatures() {
     List<FeatureInfo> allFeaturesInExecutionOrder = spec.getAllFeaturesInExecutionOrder();
-    Scheduler scheduler = this.scheduler.deriveScheduler(!spec.isSupportParallelExecution());
+
+    Scheduler scheduler = null;
+    Parallel parallel = spec.getAnnotation(Parallel.class);
+    if (parallel != null ) {
+      scheduler = this.scheduler.deriveScheduler(!spec.isSupportParallelExecution());
+    } else {
+      scheduler = this.scheduler.deriveScheduler(false);
+    }
+
     final int featureCount = allFeaturesInExecutionOrder.size();
     for (int i = 0; i < featureCount; i++) {
       final FeatureInfo feature = allFeaturesInExecutionOrder.get(i);

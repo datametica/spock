@@ -24,6 +24,8 @@ import org.junit.runners.ParentRunner;
 import org.junit.runners.model.InitializationError;
 
 import org.junit.runners.model.RunnerScheduler;
+import org.spockframework.runtime.annotations.Parallel;
+import org.spockframework.runtime.annotations.Serial;
 import org.spockframework.runtime.model.FeatureInfo;
 import org.spockframework.runtime.model.SpecInfo;
 import org.spockframework.util.IncompatibleGroovyVersionException;
@@ -46,6 +48,7 @@ public class Sputnik extends ParentRunner implements Filterable, Sortable {
   private boolean extensionsRun = false;
   private boolean descriptionGenerated = false;
   private RunnerScheduler scheduler = new SequentialRunnerScheduler();
+  private RunnerScheduler parallelScheduler = new SampleParallelRunnerScheduler();
 
   public Sputnik(Class<?> clazz) throws InitializationError {
     super(Object.class); // fake class - we need ParentRunner only to obtain RunnerScheduler
@@ -87,8 +90,21 @@ public class Sputnik extends ParentRunner implements Filterable, Sortable {
   public void run(RunNotifier notifier) {
     runExtensionsIfNecessary();
     generateSpecDescriptionIfNecessary();
-    RunContext.get().createSpecRunner(getSpec(), notifier, new Scheduler(scheduler, false)).run();
-    scheduler.finished();
+
+    Serial serial = null;
+    Class<?> type = clazz;
+    while (serial == null && type.getSuperclass() != null) {
+      serial = type.getAnnotation(Serial.class);
+      type = type.getSuperclass();
+    }
+
+    if (serial != null) {
+      RunContext.get().createSpecRunner(getSpec(), notifier, new Scheduler(scheduler, false)).run();
+      scheduler.finished();
+    } else {
+      RunContext.get().createSpecRunner(getSpec(), notifier, new Scheduler(parallelScheduler, false)).run();
+      parallelScheduler.finished();
+    }
   }
 
   public void filter(Filter filter) throws NoTestsRemainException {
